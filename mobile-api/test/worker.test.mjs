@@ -32,9 +32,11 @@ const request = (path = '/api/marketplace/session', options = {}) =>
 test('health exposes service metadata, while missing server configuration fails closed', async () => {
   const {handle} = fixture();
   assert.equal((await handle(request('/health'), {})).status, 503);
-  const result = await handle(request('/health'), env);
-  assert.equal(result.status, 200);
-  assert.equal((await result.json()).firebaseProject, 'salamoon-services');
+  for (const path of ['/', '/health']) {
+    const result = await handle(request(path), env);
+    assert.equal(result.status, 200);
+    assert.equal((await result.json()).firebaseProject, 'salamoon-services');
+  }
 });
 
 test('missing or forged credentials never reach the marketplace', async () => {

@@ -6,7 +6,7 @@ The upstream repeats its current Firebase lookup and all SQL authorization,
 account-state, financial and rate-limit checks. Customer/worker/admin data
 remains in the existing D1 database; this does not create a second marketplace.
 
-Only `/health` is unauthenticated. API paths require Firebase credentials;
+The `/` and `/health` routes expose only service status. API paths require Firebase credentials;
 unverified email is allowed only for `POST /api/marketplace/signup-role`, matching
 the upstream contract. Native login uses the Firebase SDK directly. Cookies,
 client-supplied Site headers and upstream redirects are never forwarded.

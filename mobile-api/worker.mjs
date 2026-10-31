@@ -96,7 +96,7 @@ export function createHandler({fetchImpl = fetch, now = Date.now} = {}) {
       if (url.protocol !== 'https:') fail('SECURE_CONNECTION_REQUIRED', 400);
       if (request.headers.has('Origin')) fail('FORBIDDEN', 403);
       if (!env.UPSTREAM_ACCESS_TOKEN) fail('TEMPORARILY_UNAVAILABLE', 503);
-      if (url.pathname === '/health' && request.method === 'GET') {
+      if (['/', '/health'].includes(url.pathname) && request.method === 'GET') {
         return json({service: 'sanad-mobile-api', firebaseProject: PROJECT, status: 'ok'});
       }
       if (!['GET', 'POST'].includes(request.method)) fail('METHOD_NOT_ALLOWED', 405);
