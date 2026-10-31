@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'secure_api.dart';
+import 'backend_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
@@ -85,14 +86,9 @@ class Marketplace extends ChangeNotifier {
       throw const FormatException('Sign in again to continue.');
     }
     final token = await user.getIdToken();
-    final base = const String.fromEnvironment('MARKETPLACE_API_URL');
     final response = await http
         .post(
-          secureEndpoint(
-            Uri.parse(
-              '${base.isEmpty ? Uri.base.origin : base}/api/marketplace/signup-role',
-            ),
-          ),
+          BackendConfig.marketplace('signup-role'),
           headers: {
             'Authorization': 'Bearer $token',
             'Content-Type': 'application/json',
@@ -140,11 +136,7 @@ class Marketplace extends ChangeNotifier {
     final uid = user.uid,
         generation = _generation,
         token = await user.getIdToken();
-    final base = const String.fromEnvironment('MARKETPLACE_API_URL');
-    final uri = Uri.parse(
-      '${base.isEmpty ? Uri.base.origin : base}/api/marketplace/$path',
-    );
-    secureEndpoint(uri);
+    final uri = BackendConfig.marketplace(path);
     final headers = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',

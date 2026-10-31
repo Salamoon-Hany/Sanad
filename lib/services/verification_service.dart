@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'phone_login_service.dart';
 
 String normalizeLoginIdentifier(String input) => normalizeEmail(input);
@@ -34,11 +35,12 @@ class VerificationService {
 
   Future<void> logIn(String email, String password) async {
     final normalized = normalizeEmail(email);
-    final service = _phoneLogin ?? PhoneLoginService();
+    // Native Firebase handles email/password directly. The web-only preflight
+    // is behind the private website gate and must not block Android sign-in.
+    final needsPreflight = _phoneLogin != null || (kIsWeb && _injectedAuth == null);
+    final service = needsPreflight ? (_phoneLogin ?? PhoneLoginService()) : null;
     try {
-      final checked = _injectedAuth == null || _phoneLogin != null
-          ? await service.checkEmail(normalized, password)
-          : null;
+      final checked = await service?.checkEmail(normalized, password);
       final result = await _auth.signInWithEmailAndPassword(
         email: normalized,
         password: password,
@@ -54,7 +56,7 @@ class VerificationService {
         );
       }
     } finally {
-      if (_phoneLogin == null) service.dispose();
+      if (_phoneLogin == null) service?.dispose();
     }
   }
 
