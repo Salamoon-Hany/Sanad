@@ -322,14 +322,15 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
                               : 'I verified my email',
                         ),
                       ),
-                      if (!_emailConfirmed) TextButton(
-                        onPressed: _busy || _seconds > 0 ? null : _resend,
-                        child: AppText(
-                          _seconds > 0
-                              ? 'Resend in ${_seconds}s'
-                              : 'Resend verification email',
+                      if (!_emailConfirmed)
+                        TextButton(
+                          onPressed: _busy || _seconds > 0 ? null : _resend,
+                          child: AppText(
+                            _seconds > 0
+                                ? 'Resend in ${_seconds}s'
+                                : 'Resend verification email',
+                          ),
                         ),
-                      ),
                       TextButton(
                         onPressed: _busy ? null : _anotherAccount,
                         child: const AppText('Use another account'),
