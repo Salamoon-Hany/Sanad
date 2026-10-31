@@ -7,9 +7,7 @@ class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) return web;
     if (defaultTargetPlatform == TargetPlatform.android) return android;
-    throw UnsupportedError(
-      'Firebase is not configured for this platform.',
-    );
+    throw UnsupportedError('Firebase is not configured for this platform.');
   }
 
   static FirebaseOptions get android => androidOptions(
@@ -24,7 +22,9 @@ class DefaultFirebaseOptions {
   }) {
     if (!RegExp(r'^1:859176819205:android:[0-9a-f]+$').hasMatch(appId) ||
         !RegExp(r'^AIza[0-9A-Za-z_-]{35}$').hasMatch(apiKey)) {
-      throw StateError('The registered SANAD Android configuration is missing.');
+      throw StateError(
+        'The registered SANAD Android configuration is missing.',
+      );
     }
     return FirebaseOptions(
       apiKey: apiKey,

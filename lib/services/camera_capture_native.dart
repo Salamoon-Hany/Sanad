@@ -18,7 +18,9 @@ Future<Uint8List?> captureCamera(BuildContext context) async {
     if (bytes.length > 500000) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: AppText('Choose a smaller photo (up to 500 KB).')),
+          const SnackBar(
+            content: AppText('Choose a smaller photo (up to 500 KB).'),
+          ),
         );
       }
       return null;
@@ -27,7 +29,9 @@ Future<Uint8List?> captureCamera(BuildContext context) async {
   } on PlatformException {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: AppText('Camera is unavailable. Use Upload photo instead.')),
+        const SnackBar(
+          content: AppText('Camera is unavailable. Use Upload photo instead.'),
+        ),
       );
     }
     return null;

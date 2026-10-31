@@ -6,9 +6,7 @@ import 'secure_api.dart';
 abstract final class BackendConfig {
   static const mobileOrigin = String.fromEnvironment('MARKETPLACE_API_URL');
 
-  static Uri get origin => parseOrigin(
-    kIsWeb ? Uri.base.origin : mobileOrigin,
-  );
+  static Uri get origin => parseOrigin(kIsWeb ? Uri.base.origin : mobileOrigin);
 
   @visibleForTesting
   static Uri parseOrigin(String value) {

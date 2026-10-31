@@ -37,8 +37,11 @@ class VerificationService {
     final normalized = normalizeEmail(email);
     // Native Firebase handles email/password directly. The web-only preflight
     // is behind the private website gate and must not block Android sign-in.
-    final needsPreflight = _phoneLogin != null || (kIsWeb && _injectedAuth == null);
-    final service = needsPreflight ? (_phoneLogin ?? PhoneLoginService()) : null;
+    final needsPreflight =
+        _phoneLogin != null || (kIsWeb && _injectedAuth == null);
+    final service = needsPreflight
+        ? (_phoneLogin ?? PhoneLoginService())
+        : null;
     try {
       final checked = await service?.checkEmail(normalized, password);
       final result = await _auth.signInWithEmailAndPassword(

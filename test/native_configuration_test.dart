@@ -33,17 +33,23 @@ void main() {
     expect(options.appId, contains(':android:'));
   });
 
-  test('backend accepts only an HTTPS origin without credentials or a path', () {
-    expect(BackendConfig.parseOrigin('https://api.example.com').host, 'api.example.com');
-    for (final value in [
-      'http://api.example.com',
-      'https://secret@api.example.com',
-      'https://api.example.com/api',
-      'https://api.example.com?token=secret',
-      'https://api.example.com#fragment',
-      '',
-    ]) {
-      expect(() => BackendConfig.parseOrigin(value), throwsFormatException);
-    }
-  });
+  test(
+    'backend accepts only an HTTPS origin without credentials or a path',
+    () {
+      expect(
+        BackendConfig.parseOrigin('https://api.example.com').host,
+        'api.example.com',
+      );
+      for (final value in [
+        'http://api.example.com',
+        'https://secret@api.example.com',
+        'https://api.example.com/api',
+        'https://api.example.com?token=secret',
+        'https://api.example.com#fragment',
+        '',
+      ]) {
+        expect(() => BackendConfig.parseOrigin(value), throwsFormatException);
+      }
+    },
+  );
 }
