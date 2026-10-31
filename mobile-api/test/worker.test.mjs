@@ -21,7 +21,10 @@ async function token(overrides = {}) {
 function fixture(reply = () => Response.json({account: {uid: 'test-user'}})) {
   const calls = [];
   const handle = createHandler({now: () => clock, fetchImpl: async (url, options) => {
-    if (url.startsWith('https://www.googleapis.com/')) return Response.json({keys: [jwk]});
+    if (url.startsWith('https://www.googleapis.com/')) {
+      assert.equal(options.redirect, 'manual');
+      return Response.json({keys: [jwk]});
+    }
     calls.push({url, options}); return reply();
   }});
   return {handle, calls};
@@ -120,5 +123,28 @@ test('upstream redirects and HTML never become a response or credential leak', a
     assert.equal(response.status, 503);
     const body = await response.text();
     assert.ok(!body.includes('private upstream') && !body.includes('unit-test-server-secret'));
+  }
+});
+
+
+test('signing key outages and redirects fail closed as service errors, never invalid credentials', async () => {
+  const Authorization = 'Bearer ' + await token();
+  for (const keyResponse of [() => { throw new TypeError('private transport detail'); },
+    () => Response.redirect('https://example.invalid/keys', 302),
+    () => Response.json({keys: []})]) {
+    let upstreamCalls = 0;
+    const handle = createHandler({now: () => clock, fetchImpl: async (url, options) => {
+      if (url.startsWith('https://www.googleapis.com/')) {
+        assert.equal(options.redirect, 'manual');
+        return keyResponse();
+      }
+      upstreamCalls++; return Response.json({});
+    }});
+    const result = await handle(request(undefined, {headers: {Authorization}}), env);
+    const body = await result.json();
+    assert.equal(result.status, 503);
+    assert.equal(body.error, 'TEMPORARILY_UNAVAILABLE');
+    assert.ok(!JSON.stringify(body).includes('private transport'));
+    assert.equal(upstreamCalls, 0);
   }
 });

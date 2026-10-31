@@ -47,6 +47,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
   int _seconds = 0;
   Timer? _timer;
   bool get _signup => widget.action == AccountAction.signup;
+  bool get _emailConfirmed => _service.currentUser?.emailVerified == true;
 
   @override
   void initState() {
@@ -258,7 +259,9 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
       appBar: AuthAppBar(
         title: AppText(
           _pending
-              ? 'Verify your email'
+              ? _emailConfirmed
+                    ? 'Complete sign in'
+                    : 'Verify your email'
               : _signup
               ? 'Sign up'
               : 'Log in',
@@ -280,10 +283,17 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
                         'Email verification is not set up yet. Services stay locked until Firebase is configured.',
                       ),
                     if (_pending) ...[
-                      const Icon(Icons.mark_email_unread_outlined, size: 64),
+                      Icon(
+                        _emailConfirmed
+                            ? Icons.verified_user_outlined
+                            : Icons.mark_email_unread_outlined,
+                        size: 64,
+                      ),
                       const SizedBox(height: 20),
                       AppText(
-                        'Open the verification link sent to ${_service.currentUser?.email ?? _email.text}. Then return here to continue.',
+                        _emailConfirmed
+                            ? 'Your email is verified. Retry to finish loading your account, or use another account to sign in again.'
+                            : 'Open the verification link sent to ${_service.currentUser?.email ?? _email.text}. Then return here to continue.',
                         textAlign: TextAlign.center,
                       ),
                       if ((_service.currentUser?.displayName?.trim().length ??
@@ -306,9 +316,13 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
                       const SizedBox(height: 20),
                       FilledButton(
                         onPressed: _busy ? null : _check,
-                        child: const AppText('I verified my email'),
+                        child: AppText(
+                          _emailConfirmed
+                              ? 'Retry sign in'
+                              : 'I verified my email',
+                        ),
                       ),
-                      TextButton(
+                      if (!_emailConfirmed) TextButton(
                         onPressed: _busy || _seconds > 0 ? null : _resend,
                         child: AppText(
                           _seconds > 0

@@ -460,6 +460,12 @@ const arabicStrings = <String, String>{
   'Create account': 'إنشاء حساب',
   'Forgot password?': 'نسيت كلمة المرور؟',
   'Verify your email': 'تأكيد بريدك الإلكتروني',
+  'Complete sign in': 'إكمال تسجيل الدخول',
+  'Retry sign in': 'إعادة محاولة الدخول',
+  'Your email is verified. Retry to finish loading your account, or use another account to sign in again.':
+      'إيميلك متأكد بالفعل. حاول تاني لتحميل حسابك، أو اختار حساب آخر وسجّل دخول من جديد.',
+  'Your session could not be verified. Sign out and log in again.':
+      'تعذّر التحقق من جلسة الدخول. سجّل خروج وادخل من جديد.',
   'I verified my email': 'أكدت الإيميل',
   'Resend verification email': 'إعادة إرسال رابط التحقق',
   'Use another account': 'استخدام حساب آخر',

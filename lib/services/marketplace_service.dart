@@ -154,6 +154,8 @@ class Marketplace extends ChangeNotifier {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       final code = decodeApiObject(response.body)['error'];
       throw FormatException(switch (code) {
+        'INVALID_CREDENTIALS' =>
+          'Your session could not be verified. Sign out and log in again.',
         'RATE_LIMIT' => 'Too many requests. Please wait before trying again.',
         'INSUFFICIENT_BALANCE' => 'Insufficient balance. Add funds first.',
         'WORKER_UNAVAILABLE' =>

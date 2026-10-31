@@ -91,6 +91,10 @@ class VerificationService {
         'Mobile login is temporarily unavailable. Sign in with your email or try again.',
         'Sign in is temporarily unavailable. Please retry later.',
         'A secure connection is required.',
+        'Could not sync your account. Check your connection and retry.',
+        'Could not save your account. Please retry.',
+        'Your session could not be verified. Sign out and log in again.',
+        'Sign in again to continue.',
       };
       return safe.contains(error.message)
           ? error.message
@@ -110,6 +114,10 @@ class VerificationService {
           return 'Email or password is incorrect. Sign up if you need an account.';
         case 'user-disabled':
           return 'This account is disabled.';
+        case 'user-token-expired':
+        case 'invalid-user-token':
+        case 'requires-recent-login':
+          return 'Your session could not be verified. Sign out and log in again.';
         case 'too-many-requests':
         case 'quota-exceeded':
           return 'Too many requests. Please wait before trying again.';

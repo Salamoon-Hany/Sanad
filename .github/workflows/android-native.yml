@@ -46,7 +46,7 @@ jobs:
             echo 'Compile validation only: Android Firebase registration and reachable API are still required.' >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: Compile real Flutter Android ARM64 app
-        run: flutter build apk --profile --target-platform android-arm64 --build-name 1.0.1 --build-number 2 --dart-define-from-file=${{ steps.config.outputs.path }}
+        run: flutter build apk --profile --target-platform android-arm64 --build-name 1.0.2 --build-number 3 --dart-define-from-file=${{ steps.config.outputs.path }}
       - name: Verify native engine and application payload
         shell: bash
         run: |
@@ -62,8 +62,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p apk-output
-          cp build/app/outputs/flutter-apk/app-profile.apk apk-output/SANAD_1.0.1_Android_ARM64.apk
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose apk-output/SANAD_1.0.1_Android_ARM64.apk
+          cp build/app/outputs/flutter-apk/app-profile.apk apk-output/SANAD_1.0.2_Android_ARM64.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose apk-output/SANAD_1.0.2_Android_ARM64.apk
           sha256sum apk-output/*.apk > apk-output/SHA256SUMS.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: steps.config.outputs.deliver == 'true'

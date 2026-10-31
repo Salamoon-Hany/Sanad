@@ -40,4 +40,9 @@ void main() {
       contains('Could not load your account'),
     );
   });
+  test('account session failures preserve a safe actionable message', () {
+    const safe = 'Your session could not be verified. Sign out and log in again.';
+    expect(VerificationService.message(const FormatException(safe)), safe);
+    expect(VerificationService.message(FirebaseAuthException(code: 'invalid-user-token', message: 'private token=secret')), safe);
+  });
 }

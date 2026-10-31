@@ -59,3 +59,11 @@ Server authorization, parameterized queries, atomic balance changes, request ide
 Some earlier documents in `docs/` describe historical phone-login flows, fee rates and releases. Current source, migration 0008 and this README supersede those historical descriptions. The previous owner-authorized data reset was completed earlier; routine build/test/deploy commands must not invoke the operator reset helper.
 
 The existing pull request stays unmerged until the owner requests a merge.
+
+## Android 1.0.2
+
+- Launcher name and APK filename use **SANAD** in English.
+- A verified email followed by an account/session failure now shows **Complete sign in / Retry sign in**. It does not request a second email verification or offer to resend an already verified email.
+- Safe session and account-sync failures show actionable text in English and Arabic; raw provider messages and credentials remain hidden.
+- The mobile API fetches Google's signing keys with `redirect: manual`, because Cloudflare Workers rejects `redirect: error` before the request is sent. Signing key transport failures remain 503 service errors rather than false 401 credential errors. RS256, project, issuer, expiry, signature and verified-email checks remain enforced.
+- Regression checks cover request redirect options, fail-closed key outages, verified-account retry UI, and safe error messages. A local workerd check reproduced the former request-construction failure and passed with the corrected option.

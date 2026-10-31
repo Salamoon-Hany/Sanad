@@ -8,7 +8,7 @@ const json = (body, status = 200) => Response.json(body, {status, headers: {
   'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'no-referrer',
 }});
-const fail = (code, status) => { throw Object.assign(Error(code), {status}); };
+const fail = (code, status, stage) => { throw Object.assign(Error(code), {status, stage}); };
 
 function decode(value) {
   if (!/^[A-Za-z0-9_-]+$/.test(value)) fail('INVALID_CREDENTIALS', 401);
@@ -20,52 +20,59 @@ export function createHandler({fetchImpl = fetch, now = Date.now} = {}) {
   let keys = new Map(), keyExpiry = 0, lastRefresh = 0;
   async function signingKey(kid) {
     if (now() >= keyExpiry || (!keys.has(kid) && now() - lastRefresh >= 60000)) {
-      const response = await fetchImpl(KEYS, {redirect: 'error', signal: AbortSignal.timeout(10000)});
+      let response;
+      try {
+        response = await fetchImpl(KEYS, {redirect: 'manual', signal: AbortSignal.timeout(10000)});
+      } catch { fail('TEMPORARILY_UNAVAILABLE', 503, 'key-fetch'); }
       if (!response.ok) fail('TEMPORARILY_UNAVAILABLE', 503);
-      const document = await response.json();
+      let document;
+      try { document = await response.json(); } catch { fail('TEMPORARILY_UNAVAILABLE', 503, 'key-json'); }
       if (!Array.isArray(document.keys) || document.keys.length > 20) fail('TEMPORARILY_UNAVAILABLE', 503);
       const replacement = new Map();
       for (const key of document.keys) {
         if (key.kty === 'RSA' && typeof key.kid === 'string') {
-          replacement.set(key.kid, await crypto.subtle.importKey('jwk', key,
-            {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, false, ['verify']));
+          try {
+            replacement.set(key.kid, await crypto.subtle.importKey('jwk', key,
+              {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, false, ['verify']));
+          } catch { fail('TEMPORARILY_UNAVAILABLE', 503, 'key-import'); }
         }
       }
       if (!replacement.size) fail('TEMPORARILY_UNAVAILABLE', 503);
       keys = replacement; lastRefresh = now(); keyExpiry = now() + 3600000;
     }
     const key = keys.get(kid);
-    if (!key) fail('INVALID_CREDENTIALS', 401);
+    if (!key) fail('INVALID_CREDENTIALS', 401, 'unknown-key');
     return key;
   }
 
   async function authenticate(request, allowUnverified) {
     const header = request.headers.get('Authorization') ?? '';
-    if (header.length > 8192 || !header.startsWith('Bearer ')) fail('INVALID_CREDENTIALS', 401);
+    if (header.length > 8192 || !header.startsWith('Bearer ')) fail('INVALID_CREDENTIALS', 401, 'header');
     const token = header.slice(7), pieces = token.split('.');
-    if (pieces.length !== 3) fail('INVALID_CREDENTIALS', 401);
+    if (pieces.length !== 3) fail('INVALID_CREDENTIALS', 401, 'token-format');
     let info, claims;
     try {
       info = JSON.parse(new TextDecoder('utf-8', {fatal: true}).decode(decode(pieces[0])));
       claims = JSON.parse(new TextDecoder('utf-8', {fatal: true}).decode(decode(pieces[1])));
-    } catch { fail('INVALID_CREDENTIALS', 401); }
+    } catch { fail('INVALID_CREDENTIALS', 401, 'token-json'); }
     if (info?.alg !== 'RS256' || typeof info.kid !== 'string' || info.kid.length > 200 ||
         claims?.aud !== PROJECT || claims.iss !== 'https://securetoken.google.com/' + PROJECT ||
         typeof claims.sub !== 'string' || !claims.sub || claims.sub.length > 128 ||
         typeof claims.email !== 'string' || !claims.email || claims.email.length > 254 ||
         !Number.isInteger(claims.exp) || !Number.isInteger(claims.iat) ||
         claims.exp * 1000 <= now() || claims.iat * 1000 > now() + 60000) {
-      fail('INVALID_CREDENTIALS', 401);
+      fail('INVALID_CREDENTIALS', 401, 'token-claims');
     }
+    const signing = await signingKey(info.kid);
     let valid = false;
     try {
-      valid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', await signingKey(info.kid),
+      valid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', signing,
         decode(pieces[2]), new TextEncoder().encode(pieces[0] + '.' + pieces[1]));
     } catch (error) {
       if (error.status === 503) throw error;
-      fail('INVALID_CREDENTIALS', 401);
+      fail('INVALID_CREDENTIALS', 401, 'signature-runtime');
     }
-    if (!valid) fail('INVALID_CREDENTIALS', 401);
+    if (!valid) fail('INVALID_CREDENTIALS', 401, 'signature');
     if (!allowUnverified && claims.email_verified !== true) fail('FORBIDDEN', 403);
     return token;
   }
@@ -91,6 +98,7 @@ export function createHandler({fetchImpl = fetch, now = Date.now} = {}) {
   }
 
   return async (request, env) => {
+    const requestId = crypto.randomUUID();
     try {
       const url = new URL(request.url);
       if (url.protocol !== 'https:') fail('SECURE_CONNECTION_REQUIRED', 400);
@@ -134,7 +142,8 @@ export function createHandler({fetchImpl = fetch, now = Date.now} = {}) {
         'INVALID_REQUEST', 'UNSUPPORTED_MEDIA_TYPE', 'PAYLOAD_TOO_LARGE',
         'METHOD_NOT_ALLOWED', 'SECURE_CONNECTION_REQUIRED', 'NOT_FOUND'].includes(error.message)
         ? error.message : 'TEMPORARILY_UNAVAILABLE';
-      return json({error: code, requestId: crypto.randomUUID()}, status);
+      if ([401, 403, 503].includes(status)) console.warn(JSON.stringify({event: 'sanad_auth_failure', code, stage: error.stage ?? 'boundary', requestId}));
+      return json({error: code, requestId}, status);
     }
   };
 }
