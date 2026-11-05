@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'phone_login_service.dart';
 
 String normalizeLoginIdentifier(String input) => normalizeEmail(input);
@@ -34,11 +35,15 @@ class VerificationService {
 
   Future<void> logIn(String email, String password) async {
     final normalized = normalizeEmail(email);
-    final service = _phoneLogin ?? PhoneLoginService();
+    // Native Firebase handles email/password directly. The web-only preflight
+    // is behind the private website gate and must not block Android sign-in.
+    final needsPreflight =
+        _phoneLogin != null || (kIsWeb && _injectedAuth == null);
+    final service = needsPreflight
+        ? (_phoneLogin ?? PhoneLoginService())
+        : null;
     try {
-      final checked = _injectedAuth == null || _phoneLogin != null
-          ? await service.checkEmail(normalized, password)
-          : null;
+      final checked = await service?.checkEmail(normalized, password);
       final result = await _auth.signInWithEmailAndPassword(
         email: normalized,
         password: password,
@@ -54,7 +59,7 @@ class VerificationService {
         );
       }
     } finally {
-      if (_phoneLogin == null) service.dispose();
+      if (_phoneLogin == null) service?.dispose();
     }
   }
 
@@ -86,6 +91,10 @@ class VerificationService {
         'Mobile login is temporarily unavailable. Sign in with your email or try again.',
         'Sign in is temporarily unavailable. Please retry later.',
         'A secure connection is required.',
+        'Could not sync your account. Check your connection and retry.',
+        'Could not save your account. Please retry.',
+        'Your session could not be verified. Sign out and log in again.',
+        'Sign in again to continue.',
       };
       return safe.contains(error.message)
           ? error.message
@@ -105,6 +114,10 @@ class VerificationService {
           return 'Email or password is incorrect. Sign up if you need an account.';
         case 'user-disabled':
           return 'This account is disabled.';
+        case 'user-token-expired':
+        case 'invalid-user-token':
+        case 'requires-recent-login':
+          return 'Your session could not be verified. Sign out and log in again.';
         case 'too-many-requests':
         case 'quota-exceeded':
           return 'Too many requests. Please wait before trying again.';

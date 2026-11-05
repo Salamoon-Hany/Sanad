@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'l10n/app_language.dart';
 import 'services/local_account_store.dart';
+import 'services/backend_config.dart';
 import 'screens/dashboard.dart';
 
 Future<void> main() async {
@@ -13,6 +14,7 @@ Future<void> main() async {
   await AppLanguage.initialize();
   await LocalAccountStore.initialize();
   try {
+    if (!kIsWeb) BackendConfig.marketplace('session');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );

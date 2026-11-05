@@ -34,6 +34,51 @@ class ReturningAuth extends FakeAuth {
 
 void main() {
   testWidgets(
+    'account loading failure after email verification has a separate retry state',
+    (t) async {
+      SharedPreferences.setMockInitialValues({});
+      final auth = ReturningAuth();
+      var attempts = 0;
+      await t.pumpWidget(
+        MaterialApp(
+          home: EmailAuthScreen(
+            service: VerificationService(auth: auth),
+            onVerified: () async {
+              attempts++;
+              if (attempts == 1) {
+                throw const FormatException(
+                  'Could not sync your account. Check your connection and retry.',
+                );
+              }
+            },
+          ),
+        ),
+      );
+      final fields = find.byType(TextFormField);
+      await t.enterText(fields.at(0), 'student@example.com');
+      await t.enterText(fields.at(1), 'Password123');
+      await t.ensureVisible(find.widgetWithText(FilledButton, 'Log in'));
+      await t.tap(find.widgetWithText(FilledButton, 'Log in'));
+      await t.pumpAndSettle();
+      expect(find.text('Complete sign in'), findsOneWidget);
+      expect(find.text('Retry sign in'), findsOneWidget);
+      expect(
+        find.text(
+          'Could not sync your account. Check your connection and retry.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Verify your email'), findsNothing);
+      expect(find.text('I verified my email'), findsNothing);
+      expect(find.text('Resend verification email'), findsNothing);
+      expect((auth.user as PreviouslyVerifiedUser).verificationEmails, 0);
+      await t.tap(find.text('Retry sign in'));
+      await t.pumpAndSettle();
+      expect(attempts, 2);
+      expect(find.text('Retry sign in'), findsNothing);
+    },
+  );
+  testWidgets(
     'verified returning user reloads stale status and signs in without another verification email',
     (t) async {
       SharedPreferences.setMockInitialValues({});

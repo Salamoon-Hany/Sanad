@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'secure_api.dart';
+import 'backend_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/phone_number.dart';
 
@@ -22,15 +22,7 @@ class PhoneLoginService {
   final http.Client _client;
   final Uri _base;
   FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
-  static Uri get _defaultBase => kIsWeb
-      ? Uri.parse(Uri.base.origin)
-      : Uri.parse(
-          const String.fromEnvironment(
-            'PHONE_LOGIN_BASE_URL',
-            defaultValue:
-                'https://eslam-mobile-service-app.eslam-hanyram11.chatgpt.site',
-          ),
-        );
+  static Uri get _defaultBase => BackendConfig.origin;
   void dispose() => _client.close();
 
   Future<Map<String, dynamic>> _post(

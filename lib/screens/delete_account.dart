@@ -1,4 +1,5 @@
 import '../services/secure_api.dart';
+import '../services/backend_config.dart';
 
 import 'dart:convert';
 
@@ -50,14 +51,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       );
       _password.clear();
       final token = await user.getIdToken(true);
-      const base = String.fromEnvironment('MARKETPLACE_API_URL');
       final response = await http
           .post(
-            secureEndpoint(
-              Uri.parse(
-                '${base.isEmpty ? Uri.base.origin : base}/api/marketplace/account/delete',
-              ),
-            ),
+            BackendConfig.marketplace('account/delete'),
             headers: {
               'Authorization': 'Bearer $token',
               'Content-Type': 'application/json',
@@ -66,7 +62,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
           )
           .timeout(const Duration(seconds: 60));
       if (response.statusCode != 200) {
-        final code = (jsonDecode(response.body) as Map)['error'];
+        final code = decodeApiObject(response.body)['error'];
         throw FormatException(
           code == 'DELETE_ACTIVE_WORK'
               ? 'Finish or cancel active orders and pending withdrawals before deleting your account.'
