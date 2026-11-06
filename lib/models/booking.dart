@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import '../constants/app_assets.dart';
 import '../models/selected_location.dart';
 import '../models/wallet.dart';
 
@@ -27,48 +28,48 @@ class Job {
 
 /// One catalogue supplies both the home page and the booking picker.
 final List<Job> jobCatalog = List.unmodifiable([
-  Job(id: 'builder', name: 'Builder', imagePath: 'Pics & Icons/Builder.png'),
+  Job(id: 'builder', name: 'Builder', imagePath: AppAssets.builder),
   Job(
     id: 'electrician',
     name: 'Electrician',
-    imagePath: 'Pics & Icons/Electrician.png',
+    imagePath: AppAssets.electrician,
   ),
-  Job(id: 'plumber', name: 'Plumber', imagePath: 'Pics & Icons/plumber.png'),
+  Job(id: 'plumber', name: 'Plumber', imagePath: AppAssets.plumber),
   Job(
     id: 'carpenter',
     name: 'Carpenter',
-    imagePath: 'Pics & Icons/carpenter.png',
+    imagePath: AppAssets.carpenter,
   ),
-  Job(id: 'tiler', name: 'Tiler', imagePath: 'Pics & Icons/tiler.png'),
+  Job(id: 'tiler', name: 'Tiler', imagePath: AppAssets.tiler),
   Job(
     id: 'steel_fixer',
     name: 'Steel Fixer',
-    imagePath: 'Pics & Icons/steel fixer.png',
+    imagePath: AppAssets.steelFixer,
   ),
   Job(
     id: 'plasterer',
     name: 'Plasterer',
-    imagePath: 'Pics & Icons/plasterer.png',
+    imagePath: AppAssets.plasterer,
   ),
   Job(
     id: 'repairing',
     name: 'Repairing',
-    imagePath: 'Pics & Icons/Repairing.png',
+    imagePath: AppAssets.repairing,
   ),
   Job(
     id: 'gardener',
     name: 'Gardener',
-    imagePath: 'Pics & Icons/Gardener.jpeg',
+    imagePath: AppAssets.gardener,
   ),
   Job(
     id: 'heavy_equipment',
     name: 'Heavy Equipment',
-    imagePath: 'Pics & Icons/Heavy Equipment Operator.png',
+    imagePath: AppAssets.heavyEquipment,
   ),
   Job(
     id: 'rubbish',
     name: 'Rubbish',
-    imagePath: 'Pics & Icons/Rubbish Removal.png',
+    imagePath: AppAssets.rubbish,
   ),
 ]);
 

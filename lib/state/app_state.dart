@@ -1,8 +1,23 @@
-part of '../screens/dashboard.dart';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-// Public bridge so non-part files can access the shared app state without touching
-// the private _MyAppState directly.
+import '../services/marketplace_service.dart';
+import '../services/local_account_store.dart';
+import '../services/account_service.dart';
+import '../services/phone_login_service.dart';
+import '../services/verification_service.dart';
+import '../models/wallet.dart';
+import '../models/selected_location.dart';
+import '../screens/dashboard.dart';
+
+/// Central application state manager holding account, theme, profile, orders, and notification state.
 class AppState {
+  static String _userPhoneNumber = '';
+  static String _userName = '';
+  static String _userEmail = '';
+  static String _userGender = '';
+
   static void clearAccount() {
     Marketplace.shared.stop();
     setPhoneNumber('');
@@ -35,17 +50,17 @@ class AppState {
     }
   }
 
-  static void setPhoneNumber(String phone) => _MyAppState.setPhoneNumber(phone);
-  static String getPhoneNumber() => _MyAppState.getPhoneNumber();
+  static void setPhoneNumber(String phone) => _userPhoneNumber = phone;
+  static String getPhoneNumber() => _userPhoneNumber;
 
-  static void setUserName(String name) => _MyAppState.setUserName(name);
-  static String getUserName() => _MyAppState.getUserName();
+  static void setUserName(String name) => _userName = name;
+  static String getUserName() => _userName;
 
-  static void setUserEmail(String email) => _MyAppState.setUserEmail(email);
-  static String getUserEmail() => _MyAppState.getUserEmail();
+  static void setUserEmail(String email) => _userEmail = email;
+  static String getUserEmail() => _userEmail;
 
-  static void setUserGender(String gender) => _MyAppState.setUserGender(gender);
-  static String getUserGender() => _MyAppState.getUserGender();
+  static void setUserGender(String gender) => _userGender = gender;
+  static String getUserGender() => _userGender;
 
   static final profileImage = ValueNotifier<Uint8List?>(null);
   static void setUserProfileImageBytes(Uint8List? bytes) {

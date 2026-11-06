@@ -38,6 +38,20 @@ class LanguageScope extends InheritedNotifier<ValueNotifier<String>> {
 String tr(String text) => translateText(text, AppLanguage.code.value);
 String? trNullable(String? text) => text == null ? null : tr(text);
 
+/// Type-safe translation keys for canonical UI strings.
+abstract class TrKeys {
+  static const depositReceipt = 'Deposit receipt';
+  static const depositConfirmed = 'Deposit confirmed';
+  static const paymentMethod = 'Payment method';
+  static const totalToPay = 'Total to pay';
+  static const email = 'Email';
+  static const reference = 'Reference';
+  static const pending = 'pending';
+  static const inProgress = 'in_progress';
+  static const completed = 'completed';
+  static const cancelled = 'cancelled';
+}
+
 /// Keeps canonical strings in state so changing the language updates existing
 /// notifications and order statuses as well as newly-created screens.
 class AppText extends StatelessWidget {

@@ -4,7 +4,6 @@ import '../services/camera_capture.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import '../services/local_account_store.dart';
-import '../services/phone_login_service.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,6 +11,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/verification_service.dart';
 import '../models/selected_location.dart';
+import '../state/app_state.dart';
 import 'location_picker.dart';
 import 'welcome.dart';
 import '../widgets/sanad_ui.dart';
@@ -33,7 +33,6 @@ part 'place_order.dart';
 part 'profile.dart';
 part 'orders.dart';
 part 'notifications.dart';
-part '../state/app_state.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -43,51 +42,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static String _userPhoneNumber = '';
-  static String _userName = '';
-  static String _userEmail = '';
-  static String _userGender = '';
-
   @override
   void initState() {
     super.initState();
     if (VerificationService.configured) {
       final user = FirebaseAuth.instance.currentUser;
-      _userPhoneNumber = '';
-      _userEmail = user?.email ?? '';
+      AppState.setPhoneNumber('');
+      AppState.setUserEmail(user?.email ?? '');
     }
-  }
-
-  static void setPhoneNumber(String phone) {
-    _userPhoneNumber = phone;
-  }
-
-  static String getPhoneNumber() {
-    return _userPhoneNumber;
-  }
-
-  static void setUserName(String name) {
-    _userName = name;
-  }
-
-  static String getUserName() {
-    return _userName;
-  }
-
-  static void setUserEmail(String email) {
-    _userEmail = email;
-  }
-
-  static String getUserEmail() {
-    return _userEmail;
-  }
-
-  static void setUserGender(String gender) {
-    _userGender = gender;
-  }
-
-  static String getUserGender() {
-    return _userGender;
   }
 
   @override

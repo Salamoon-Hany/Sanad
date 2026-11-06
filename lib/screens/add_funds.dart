@@ -246,6 +246,11 @@ class _AddFundsScreenState extends State<AddFundsScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*[\.\,]?\d{0,2}'),
+                          ),
+                        ],
                         onChanged: _edited,
                         decoration: InputDecoration(
                           labelText: tr('Amount'),

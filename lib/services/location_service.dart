@@ -18,9 +18,10 @@ class LocationProblem implements Exception {
 class LocationService {
   final http.Client? client;
   LocationService({this.client});
-  Future<http.Response> _get(Uri uri) => client != null
-      ? client!.get(secureEndpoint(uri))
-      : http.get(secureEndpoint(uri));
+  Future<http.Response> _get(Uri uri) => (client != null
+          ? client!.get(secureEndpoint(uri))
+          : http.get(secureEndpoint(uri)))
+      .timeout(const Duration(seconds: 10));
   static const _base = String.fromEnvironment(
     'GEOCODER_URL',
     defaultValue: 'https://photon.komoot.io',
